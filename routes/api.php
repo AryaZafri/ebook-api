@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HeloController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,5 +31,20 @@ Route::get('halo', function(){
 //Route::put('halocontroller',[HeloController::class, 'update]);
 //Route::delete('halocontroller',[HeloController::class, 'destroy]);
 Route::resource('halocontroller',HeloController::class);
-Route::resource('siswa',SiswaController::class);
-Route::resource('books',BookController::class);
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+//public route
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::resource('siswa', SiswaController::class);
+Route::resource('books', BookController::class)->except('store', 'update', 'destroy');
+
+//protected routes
+Route::middleware('auth:sanctum')->group(function() {
+    Route::resource('books', BookController::class)->except('show', 'index');
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
